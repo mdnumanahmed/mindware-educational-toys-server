@@ -38,11 +38,26 @@ async function run() {
     });
 
     // Toy routes
+    
+    // indexing field
+    const indexKeys = {toy_name : 1}
+    const indexOptions = {name: 'toyName'}
+    const result = await toyCollection.createIndex(indexKeys, indexOptions)
+    
+    // search api for toys
+    app.get('/toys/:text', async(req, res) => {
+      const text = req.params.text
+      console.log(text);
+      const result = await toyCollection.find({toy_name : {$regex: text, $options:'i'}}).toArray()
+      res.send(result)
+    })
+
     app.get('/toys', async(req, res) => {
       const toys = await toyCollection.find().toArray()
       res.send(toys)
     })
-    
+
+
     app.post('/toys', async(req, res) => {
       const data = req.body
       const result = await toyCollection.insertOne(data)
