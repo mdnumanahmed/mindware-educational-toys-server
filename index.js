@@ -26,6 +26,8 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
+    const toyCollection = client.db('mindwareDB').collection('toys')
+
     // jwt
     app.post("/jwt", (req, res) => {
       const user = req.body;
@@ -34,6 +36,13 @@ async function run() {
       });
       res.send({ token });
     });
+
+    // Toy routes
+    app.post('/toys', async(req, res) => {
+      const data = req.body
+      const result = await toyCollection.insertOne(data)
+      res.send(result)
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
