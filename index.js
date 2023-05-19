@@ -38,6 +38,11 @@ async function run() {
     });
 
     // Toy routes
+    app.get('/toys', async(req, res) => {
+      const toys = await toyCollection.find().toArray()
+      res.send(toys)
+    })
+    
     app.post('/toys', async(req, res) => {
       const data = req.body
       const result = await toyCollection.insertOne(data)
