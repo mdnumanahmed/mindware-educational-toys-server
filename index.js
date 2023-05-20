@@ -29,13 +29,13 @@ async function run() {
     const toyCollection = client.db('mindwareDB').collection('toys')
 
     // jwt
-    app.post("/jwt", (req, res) => {
-      const user = req.body;
-      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "3d",
-      });
-      res.send({ token });
-    });
+    // app.post("/jwt", (req, res) => {
+    //   const user = req.body;
+    //   const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+    //     expiresIn: "3d",
+    //   });
+    //   res.send({ token });
+    // });
 
     // Toy routes
     
@@ -57,6 +57,13 @@ async function run() {
       res.send(result)
     })
 
+    app.get('/update-toy/:id', async(req, res) => {
+      const id = req.params.id
+      const query = {_id: new ObjectId(id)}
+      const result = await toyCollection.findOne(query)
+      res.send({result})
+    })
+
     app.get('/toys', async(req, res) => {
       const toys = await toyCollection.find().toArray()
       res.send(toys)
@@ -65,7 +72,7 @@ async function run() {
 
     app.post('/toys', async(req, res) => {
       const data = req.body
-      data.createdAt = new Date();
+      data.createdat = new Date();
       const result = await toyCollection.insertOne(data)
       res.send(result)
     })
@@ -77,11 +84,18 @@ async function run() {
       const options = { upsert: true };
       const updateDoc = {
         $set : {
-          updatedToy : {data}
+          updatedtoy : data
         }
-      }
+      }      
       const result = await toyCollection.updateOne(filter, updateDoc, options)
-      console.log(result);
+      res.send(result)
+    })
+
+
+    app.delete('/toys/:id', async(req, res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await toyCollection.deleteOne(query)
       res.send(result)
     })
 
