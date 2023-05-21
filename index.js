@@ -53,7 +53,14 @@ async function run() {
 
     app.get('/my-toys/:email', async(req, res) => {
       const query = {seller_email : req.params.email}
-      const result = await toyCollection.find(query).toArray()
+      const {sort} = req.query;
+      const sortOptions = {}
+      if(sort === 'asc'){
+        sortOptions.price = 1
+      }else if(sort === 'desc'){
+        sortOptions.price = -1
+      }
+      const result = await toyCollection.find(query).sort(sortOptions).toArray()
       res.send(result)
     })
 
@@ -65,7 +72,6 @@ async function run() {
     })
     
     app.get("/categorizedToy/:text", async (req, res) => {
-      console.log(req.params.text);
       if (
         req.params.text === "Math Toys" ||
         req.params.text === "Language Toys" ||
@@ -74,7 +80,6 @@ async function run() {
         const result = await toyCollection
           .find({ sub_category : req.params.text })
           .toArray();
-        // console.log(result);
         return res.send(result);
       } else {
         const result = await toyCollection.find().toArray();
@@ -90,22 +95,23 @@ async function run() {
 
     app.post('/toys', async(req, res) => {
       const data = req.body
-      data.createdat = new Date();
+      data.createdAt = new Date();
       const result = await toyCollection.insertOne(data)
       res.send(result)
     })
 
-    app.put('/toy-update/:id', async(req, res) => {
+    app.put('/toys/:id', async(req, res) => {
       const id = req.params.id
       const data = req.body;
       const filter = {_id: new ObjectId(id)}
-      const options = { upsert: true };
       const updateDoc = {
         $set : {
-          updatedtoy : data
+          price: data.price,
+          available_quantity: data.available_quantity,
+          description: data.description,
         }
       }      
-      const result = await toyCollection.updateOne(filter, updateDoc, options)
+      const result = await toyCollection.updateOne(filter, updateDoc)
       res.send(result)
     })
 
